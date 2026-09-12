@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>멍멍 테트리스 · 쇼핑 태그</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:#fff6ef;color:#513c32;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{position:sticky;top:0;z-index:20;background:#fffaf7ee;backdrop-filter:blur(10px);border-bottom:1px solid #efdccc;padding:10px max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left))}.top{display:flex;align-items:center;justify-content:space-between;gap:8px}.title{font-weight:900;font-size:17px}.setup{border:0;border-radius:12px;padding:9px 11px;background:#5c463b;color:#fff;font-weight:800}.tags{display:flex;gap:7px;overflow-x:auto;padding:9px 0 3px;scrollbar-width:none}.tags::-webkit-scrollbar{display:none}.tag{flex:0 0 auto;border:1px solid #ead6c6;border-radius:999px;background:#fff;color:#513c32;text-decoration:none;padding:9px 12px;font-weight:800;font-size:13px;box-shadow:0 2px 0 #e7d3c4}.notice{font-size:10px;line-height:1.4;color:#8d766a;margin-top:6px}.game{width:100%;height:calc(100vh - 150px);min-height:650px;border:0;display:block;background:#fff6ef}.modal{position:fixed;inset:0;z-index:50;background:#35292388;display:flex;align-items:center;justify-content:center;padding:14px}.hidden{display:none}.card{width:min(620px,100%);max-height:92vh;overflow:auto;background:#fffaf6;border-radius:22px;padding:17px;box-shadow:0 24px 70px #0004}.head{display:flex;align-items:center;justify-content:space-between;gap:10px}.head h2{margin:0;font-size:22px}.x{border:0;background:#eee1d7;width:38px;height:38px;border-radius:50%;font-size:17px}.guide{font-size:12px;line-height:1.55;color:#806b60;margin:8px 0 13px}.row{display:grid;grid-template-columns:145px 1fr;gap:8px;margin-bottom:8px}.row input{width:100%;padding:11px;border:1px solid #e5d1c2;border-radius:12px;background:#fff;font-size:14px;outline:none}.row input:focus{border-color:#f0965d}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.buttons button{border:0;border-radius:13px;padding:12px;font-weight:900}.save{background:#ff9d64;color:#fff}.copy{background:#72b788;color:#fff}.warning{display:none;font-size:11px;color:#b76442;margin-top:8px}.share{display:none;margin-top:10px;background:#fff;border:1px solid #ead7c9;border-radius:12px;padding:10px;font-size:11px;word-break:break-all}.empty{border:1px dashed #d9bfae;background:#fff8f2;border-radius:999px;padding:8px 12px;font-size:12px;color:#896f61;white-space:nowrap}@media(max-width:650px){.row{grid-template-columns:1fr}.game{min-height:720px;height:calc(100vh - 165px)}.title{font-size:15px}.setup{font-size:12px;padding:8px 10px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><div class="title">🐶 멍멍 테트리스 <span style="font-weight:500">· 쇼핑</span></div><button class="setup" id="setupBtn">내 쇼핑 태그 설정</button></div>
+ <div class="tags" id="tags"></div>
+ <div class="notice">이 게시물은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+</header>
+<iframe class="game" src="./index.html" title="멍멍 조합 테트리스"></iframe>
+
+<div class="modal hidden" id="modal">
+ <div class="card">
+  <div class="head"><h2>🛍️ 쿠팡 쇼핑 태그 연결</h2><button class="x" id="closeBtn">✕</button></div>
+  <div class="guide">쿠팡 파트너스에서 만든 <b>파트너스 링크</b>만 붙여 넣으면 됩니다. 비밀번호나 API Secret Key는 절대 넣지 마세요. 저장 후 <b>공유 링크 복사</b>를 누르면 쇼핑 태그가 포함된 게임 주소가 만들어집니다.</div>
+  <div id="form"></div>
+  <div class="warning" id="warning">⚠️ 일반 쿠팡 상품 주소가 아니라 쿠팡 파트너스에서 생성한 추적 링크를 사용해야 수익이 연결됩니다.</div>
+  <div class="buttons"><button class="save" id="saveBtn">태그 저장</button><button class="copy" id="copyBtn">공유 링크 복사</button></div>
+  <div class="share" id="share"></div>
+ </div>
+</div>
+<script>
+(function(){
+var COUNT=5;
+var defaults=["강아지 장난감","강아지 간식","강아지 방석","산책용품","반려동물 용품"];
+function clean(v){var out=[];for(var i=0;i<COUNT;i++){var x=v&&v[i]?v[i]:{};out.push({name:String(x.name||defaults[i]).slice(0,40),url:String(x.url||"").trim().slice(0,800)});}return out;}
+function load(){try{if(location.hash.indexOf("#shop=")===0)return clean(JSON.parse(decodeURIComponent(location.hash.slice(6))));var s=localStorage.getItem("dogShopTagsV2");if(s)return clean(JSON.parse(s));}catch(e){}return clean([]);}
+var cfg=load();
+function ok(u){return /^https?:\/\//i.test(u)}
+function render(){var t=document.getElementById("tags");t.innerHTML="";var n=0;cfg.forEach(function(x){if(!ok(x.url))return;n++;var a=document.createElement("a");a.className="tag";a.href=x.url;a.target="_blank";a.rel="nofollow sponsored noopener noreferrer";a.textContent="🛒 "+x.name;t.appendChild(a)});if(!n){var e=document.createElement("span");e.className="empty";e.textContent="아직 쇼핑 태그가 없어요 · 설정 버튼을 눌러 연결하세요";t.appendChild(e)}}
+function build(){var f=document.getElementById("form");f.innerHTML="";for(var i=0;i<COUNT;i++){var r=document.createElement("div");r.className="row";r.innerHTML='<input id="n'+i+'" maxlength="40" placeholder="태그 이름"><input id="u'+i+'" type="url" placeholder="https://link.coupang.com/a/...">';f.appendChild(r);document.getElementById("n"+i).value=cfg[i].name;document.getElementById("u"+i).value=cfg[i].url}}
+function open(){build();document.getElementById("warning").style.display="none";document.getElementById("share").style.display="none";document.getElementById("modal").classList.remove("hidden")}
+function close(){document.getElementById("modal").classList.add("hidden")}
+function collect(){var a=[],warn=false;for(var i=0;i<COUNT;i++){var name=document.getElementById("n"+i).value.trim()||defaults[i],url=document.getElementById("u"+i).value.trim();if(url&&ok(url)&&url.indexOf("link.coupang.com")<0)warn=true;a.push({name:name,url:url})}document.getElementById("warning").style.display=warn?"block":"none";return clean(a)}
+function save(){cfg=collect();try{localStorage.setItem("dogShopTagsV2",JSON.stringify(cfg))}catch(e){}render()}
+function makeShare(){save();return location.href.split("#")[0]+"#shop="+encodeURIComponent(JSON.stringify(cfg))}
+function copy(){var url=makeShare(),box=document.getElementById("share");box.textContent=url;box.style.display="block";if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(url).catch(function(){})}else{var q=document.createElement("textarea");q.value=url;document.body.appendChild(q);q.select();try{document.execCommand("copy")}catch(e){}document.body.removeChild(q)}}
+document.getElementById("setupBtn").onclick=open;document.getElementById("closeBtn").onclick=close;document.getElementById("saveBtn").onclick=save;document.getElementById("copyBtn").onclick=copy;document.getElementById("modal").onclick=function(e){if(e.target===this)close()};render();
+})();
+</script>
+</body>
+</html>
